@@ -6,42 +6,12 @@ using UnityEngine;
 
 public class NetworkManager : MonoBehaviour
 {
-    private static ColyseusRoom<MyRoomState> _room = null;
+    private static ColyseusRoom<GameRoomState> _room = null;
     private static ColyseusClient _client = null;
     private static string HOST_ADDRESS = "ws://localhost:2567";
     private static string GAME_NAME = "my_room";
 
     [SerializeField] private GameObject playerPrefab;
-
-    private async void Awake()
-    {
-        await JoinOrCreateGame();
-       
-        /*GameRoom.State.players.OnAdd += (key, player) =>
-        {
-            Debug.Log($"Player {key} has joined the Game!");
-            GameObject playerInstance = Instantiate(playerPrefab);
-            Debug.Log($"key {key} && session id {_room.SessionId}");
-        };*/
-        GameRoom.State.players.OnAdd((key, player) =>
-        {
-            Debug.Log($"Player {key} has joined the Game!");
-            GameObject playerInstance = Instantiate(playerPrefab);
-            Debug.Log($"key {key} && session id {_room.SessionId}");
-        });
-    }
-
-    public void Init()
-    {
-        _client = new ColyseusClient(HOST_ADDRESS);
-
-        
-    }
-
-    public async Task JoinOrCreateGame()
-    {
-        _room = await Client.JoinOrCreate<MyRoomState>(GAME_NAME);
-    }
     public ColyseusClient Client
     {
         get
@@ -54,7 +24,7 @@ public class NetworkManager : MonoBehaviour
             return _client;
         }
     }
-    public ColyseusRoom<MyRoomState> GameRoom
+    public ColyseusRoom<GameRoomState> GameRoom
     {
         get
         {
@@ -65,6 +35,47 @@ public class NetworkManager : MonoBehaviour
             return _room;
         }
     }
+    private async void Awake()
+    {
+        await JoinOrCreateGame();
+        
+        GameRoom.State.players.OnAdd((key, player) =>
+        {
+            Debug.Log($"Player {key} has joined the Game!");
+            //GameObject playerInstance = Instantiate(playerPrefab);
+            playerPrefab.SetActive(true);
+            Debug.Log($"key {key} && session id {_room.SessionId}");
+            playerPrefab.GetComponent<InputReaderHandler>().OnMove += UpdatePositionState;
+            player.OnChange(() =>
+            {
+                Debug.Log($"Server responds key {key} and {player.x}, {player.y}, {player.z}");
+            });
+
+        });
+        GameRoom.State.players.OnRemove(((key, player) =>
+        {
+            playerPrefab.GetComponent<InputReaderHandler>().OnMove -= UpdatePositionState;
+        }));
+        GameRoom.State.players.OnChange((key, player) =>
+        {
+            Debug.Log($"Server responds key {key} and {player.x}, {player.y}, {player.z}");
+        });
+        
+
+    }
+
+    public void Init()
+    {
+        _client = new ColyseusClient(HOST_ADDRESS);
+
+        
+    }
+
+    public async Task JoinOrCreateGame()
+    {
+        _room = await Client.JoinOrCreate<GameRoomState>(GAME_NAME);
+    }
+ 
 
     public void UpdatePositionState(Vector3 position)
     {
