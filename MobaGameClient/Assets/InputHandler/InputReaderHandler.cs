@@ -13,6 +13,8 @@ public class InputReaderHandler : MonoBehaviour
     private Vector2 _moveDirection;
     private bool _isJumping;
 
+    public event Action<Vector3> OnMove; 
+
     private void Start()
     {
         _input = new InputReader();
@@ -24,7 +26,8 @@ public class InputReaderHandler : MonoBehaviour
     private void InputOnMoveEvent(Vector2 value)
     {
         _moveDirection = value;
-        Debug.Log($"move direction value {_moveDirection}");
+        //Debug.Log($"move direction value {_moveDirection}");
+        OnMove?.Invoke(transform.position);
     }
 
     private void Update()
@@ -35,5 +38,6 @@ public class InputReaderHandler : MonoBehaviour
     private void Move()
     {
         transform.position += new Vector3(_moveDirection.x, 0, _moveDirection.y) * speed * Time.deltaTime;
+       
     }
 }

@@ -27,7 +27,7 @@ public class InputReader : GameInput.IGameplayActions, GameInput.IUIActions
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        Debug.Log($"context {context.phase} and value {context.ReadValue<Vector2>()}");
+        //Debug.Log($"context {context.phase} and value {context.ReadValue<Vector2>()}");
         MoveEvent?.Invoke(context.ReadValue<Vector2>());
     }
 
