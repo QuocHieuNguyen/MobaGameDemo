@@ -5,10 +5,6 @@ export class Player extends Schema {
   @type("number") y: number = 0;
   @type("number") z: number = 0;
 }
-export class MyRoomState extends Schema {
-
-  @type({map: Player}) players: MapSchema<Player> = new MapSchema<Player>();
-
+export class GameRoomState extends Schema {
+  @type({ map: Player }) players: MapSchema<Player> = new MapSchema<Player>();
 }
-
-
